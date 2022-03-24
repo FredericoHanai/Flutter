@@ -1,47 +1,85 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'tarefa.dart';
 
-void main(){
-  runApp(new ListaTarefasApp());
+void main() {
+  runApp(new ListaTarefas());
 }
 
-class ListaTarefasApp extends StatelessWidget{
+class ListaTarefas extends StatelessWidget {
   @override
-  Widget build(BuildContext){
-    return new MaterialApp(
-      home: new ListaScreen()
-    );
+  Widget build(BuildContext context) {
+    return new MaterialApp(home: new ListaScreen());
   }
 }
 
-class ListaScreen extends StatelessWidget{
+class ListaScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext){
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Lista de tarefas"),
-      ),
-      body:Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          new Row(
-            children: [
-              IconButton(
-                icon: new Icon(Icons.check_box, color: Colors.green,),
-                iconSize: 42.0,
-                onPressed: () {},
-              ),
-              new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Lavar o carro"),
-                  Text("13/09/2022")
-                ],
-              )
-            ],
-          )
-        ],
-      ) ,
+  State<StatefulWidget> createState() {
+    return new ListaScreenState();
+  }
+}
+
+class ListaScreenState extends State<ListaScreen> {
+  List<Tarefa> tarefas = <Tarefa>[];
+  TextEditingController controller = TextEditingController();
+
+  void adicionaTarefa(String nome) {
+    setState(() {
+      tarefas.add(Tarefa(nome));
+    });
+    controller.clear();
+  }
+
+  Widget getItem(Tarefa tarefa) {
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(
+            tarefa.concluida! ? Icons.check_box : Icons.check_box_outline_blank,
+            size: 42.0,
+            color: Colors.green,
+          ),
+          padding: EdgeInsets.only(left: 10, right: 30.0),
+          onPressed: () {
+            setState(() {
+              tarefa.concluida = true;
+            });
+          },
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              tarefa.nome!,
+              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            ),
+            Text(tarefa.data!.toIso8601String())
+          ],
+        )
+      ],
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+        appBar: new AppBar(title: new Text("Lista Tarefas")),
+        body: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Container(
+                padding: EdgeInsets.all(8.0),
+                child: TextField(
+                    controller: controller, onSubmitted: adicionaTarefa)),
+            Expanded(
+                child: ListView.builder(
+                  itemCount: tarefas.length,
+                  itemBuilder: (_, indice) {
+                    return getItem(tarefas[indice]);
+                  },
+                ))
+          ],
+        ));
   }
 }
